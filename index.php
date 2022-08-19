@@ -92,8 +92,8 @@
           class AclGroup
           {
             public $name;
-            public array $consumersIds;
-            public array $consumers;
+            public $consumersIds;
+            public $consumers;
           }
 
           class Consumer 
