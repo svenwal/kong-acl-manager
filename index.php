@@ -142,7 +142,7 @@
             echo "<h2><input type=\"radio\" id=\"$group->name\" name=\"selected_group\" value=\"$group->name\" />&nbsp;".$group->name."</h2>";
             echo "<ul>";
             foreach ($group->consumers as $consumer) {
-              echo "<li><a href=\"" . $manager_url . "/" . $selected_workspace . "/consumers/" .$consumer->username . "/#credentials\">" . $consumer->username;
+              echo "<li><a href=\"" . $manager_url . "/" . $selected_workspace . "/consumers/" .$consumer->username . "/#credentials\" target=\”_blank\”>" . $consumer->username;
               if(isset($consumer->custom_id)) {
                 echo " (" . $consumer->custom_id . ")";
               }
