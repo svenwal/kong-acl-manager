@@ -12,9 +12,8 @@
 
     <link rel="icon" type="image/x-icon" href="/favicon.png">
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
-   <link rel="stylesheet" href="./css/custom.css" >
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
     <!--[if lt IE 9]>
       <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
@@ -23,27 +22,22 @@
   </head>
   <body>
 
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">Kong Notifier</a>
-        </div>
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#">View groups</a></li>
-            <li><a href="mailto:sven@konghq.com">Contact</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light ">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Kong Developer Notifier</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarScroll">
+      <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/">ACL Groups</a>
+        </li>
+    </div>
+  </div>
+</nav>
 
-    <div class="container jumbotron">
+    <div class="mt-4 p-5 bg-secondary text-white rounded d-flex justify-content-center align-items-center">
 
       <div class="starter-template">
         <h1>ACL Groups</h1>
@@ -52,7 +46,7 @@
         <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="GET">
           <div class="form-row row vertical-center-row" style="max-width:300px">
             <div class="form-group col-md-8">
-              <select name="workspace" class="form-control">
+              <select name="workspace" class="form-select">
                 <?php
                   $workspaces = kong_admin_api_call("/workspaces");
                   if(isset($_GET["workspace"])) {
@@ -97,6 +91,16 @@
             public $consumers;
           }
 
+          class AclPluginInstance
+          {
+            public $id;
+            public $allow;
+            public $deny;
+            public $global;
+            public $service;
+            public $route;
+          }
+
           class Consumer 
           {
             public $id;
@@ -105,12 +109,10 @@
           }
 
 
-
-
-          $consumers = kong_admin_api_call("/consumers", $selected_workspace);
-          //print_r($consumers["json"]->data);
-          //$consumers = array();
-          foreach ($consumers["json"]->data as $consumer) {
+          // fetch consumers
+          $consumers = array();
+          $consumersResponse = kong_admin_api_call("/consumers", $selected_workspace);
+          foreach ($consumersResponse["json"]->data as $consumer) {
             $consumerObject = new Consumer();
             $consumerObject->id = $consumer->id;
             $consumerObject->username = $consumer->username;
@@ -118,7 +120,7 @@
             $consumers[$consumerObject->id] = $consumerObject;
           }
 
-
+          // fetch ACL groups
           $acls = kong_admin_api_call("/acls", $selected_workspace);
           $groups = array();
 
@@ -133,23 +135,88 @@
               $groups[$groupObject->name] = $groupObject;
               $groups[$groupObject->name]->consumers[] = $consumers[$group->consumer->id];
             }
+
+            // fetch acl plugin instances
+            $pluginInstances = array();
+            $pluginInstancesResponse = kong_admin_api_call("/plugins?name=acl", $selected_workspace);
+            foreach ($pluginInstancesResponse["json"]->data as $instance) {
+              $instanceObject = new AclPluginInstance();
+              $instanceObject->id = $instance->id;
+              $instanceObject->allow = $instance->config->allow;
+              $instanceObject->deny = $instance->config->deny;
+              $instanceObject->service = $instance->service;
+              $instanceObject->route = $instance->route;
+              $pluginInstances[$instanceObject->id] = $instanceObject;
+            }
+
             
+            // fetch services
+            $services = array();
+            $servicesResponse = kong_admin_api_call("/services", $selected_workspace);
+            $services = array_column($servicesResponse["json"]->data, 'name', 'id');
+
+            // fetch routes
+            $routes = array();
+            $routesResponse = kong_admin_api_call("/routes", $selected_workspace);
+            $routes = array_column($routesResponse["json"]->data, 'name', 'id');
 
           }
 
 
           foreach ($groups as $group) {
+            echo "<div class=\"input-group\">";
             echo "<h2><input type=\"radio\" id=\"$group->name\" name=\"selected_group\" value=\"$group->name\" />&nbsp;".$group->name."</h2>";
-            echo "<ul>";
-            foreach ($group->consumers as $consumer) {
-              echo "<li><a href=\"" . $manager_url . "/" . $selected_workspace . "/consumers/" .$consumer->username . "/#credentials\" target=\”_blank\”>" . $consumer->username;
-              if(isset($consumer->custom_id)) {
-                echo " (" . $consumer->custom_id . ")";
-              }
-              echo "</a></li>";
-            }
-            echo "</ul>";
+            echo "</div>";
 
+            // Consumers
+            echo "<div class=\"row align-items-start\">";
+              echo "<div class=\"col\">";
+                echo "<table class=\"table table-striped table-light\"><thead><tr><th>Consumers</th><tbody>";
+                  foreach ($group->consumers as $consumer) {
+                    echo "<tr><td><a href=\"" . $manager_url . "/" . $selected_workspace . "/consumers/" .$consumer->username . "/#credentials\" target=\”_blank\”>" . $consumer->username;
+                    if(isset($consumer->custom_id)) {
+                      echo " (" . $consumer->custom_id . ")";
+                    }
+                    echo "</a></td></tr></tr";
+                  }
+                echo "</tbody></table>";
+
+              // Allow
+              echo "</div><div class=\"col\">";
+              echo "<table class=\"table table-striped table-success\"><thead><tr><th>Allow</th><tbody>";
+              foreach ($pluginInstances as $instance) {
+                if(isset($instance->allow)) {
+                  if(in_array($group->name,$instance->allow)) {
+                    if(isset($instance->service)) {
+                      echo "<tr><td><span class=\"badge bg-secondary\">Service</span> <a href=\"" . $manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $services[$instance->service->id] ."</a></td><tr>";
+                    } else if(isset($instance->route)) {
+                      echo "<tr><td><span class=\"badge bg-primary\">Route</span> <a href=\"" . $manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $routes[$instance->route->id] ."</a></td><tr>";
+                    } else {
+                      echo "<tr><td><span class=\"badge bg-dark\">Global</span> <a href=\"" . $manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $selected_workspace ."</a></td><tr>";
+                    }
+                  }
+                }
+              }
+              echo "</tbody></table>";
+    
+              // Deny
+              echo "</div><div class=\"col\">";
+              echo "<table class=\"table table-striped table-danger\"><thead><tr><th>Deny</th><tbody>";
+              foreach ($pluginInstances as $instance) {
+                if(isset($instance->deny)) {
+                  if(in_array($group->name,$instance->deny)) {
+                    if(isset($instance->service)) {
+                      echo "<tr><td><span class=\"badge bg-secondary\">Service</span> <a href=\"" . $manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $services[$instance->service->id] ."</a></td><tr>";
+                    } else if(isset($instance->route)) {
+                      echo "<tr><td><span class=\"badge bg-primary\">Route</span> <a href=\"" . $manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $routes[$instance->route->id] ."</a></td><tr>";
+                    } else {
+                      echo "<tr><td><span class=\"badge bg-dark\">Global</span> <a href=\"" . $manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $selected_workspace ."</a></td><tr>";
+                    }
+                  }
+                }
+              }
+              echo "</tbody></table>";
+            echo "</div></div>";
           }
 
           echo "<hr />";
@@ -188,8 +255,7 @@
     </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
   </body>
 </html>
