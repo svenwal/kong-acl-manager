@@ -1,7 +1,12 @@
 <!doctype html>
 <?php
-  require("kong_admin_api.php");
+  require_once("kong/kong_admin_api.php");
   require_once("secrets.php");
+  require("kong/AclGroups.php");
+  require("kong/Consumers.php");
+  require("kong/AclPluginInstances.php");
+  require("kong/Services.php");
+  require("kong/Routes.php");
 ?>
 <html lang="en">
   <head>
@@ -84,83 +89,12 @@
 
       
       <?php
-          class AclGroup
-          {
-            public $name;
-            public $consumersIds;
-            public $consumers;
-          }
 
-          class AclPluginInstance
-          {
-            public $id;
-            public $allow;
-            public $deny;
-            public $global;
-            public $service;
-            public $route;
-          }
-
-          class Consumer 
-          {
-            public $id;
-            public $username;
-            public $custom_id;
-          }
-
-
-          // fetch consumers
-          $consumers = array();
-          $consumersResponse = kong_admin_api_call("/consumers", $selected_workspace);
-          foreach ($consumersResponse["json"]->data as $consumer) {
-            $consumerObject = new Consumer();
-            $consumerObject->id = $consumer->id;
-            $consumerObject->username = $consumer->username;
-            $consumerObject->custom_id = $consumer->custom_id;
-            $consumers[$consumerObject->id] = $consumerObject;
-          }
-
-          // fetch ACL groups
-          $acls = kong_admin_api_call("/acls", $selected_workspace);
-          $groups = array();
-
-          foreach ($acls["json"]->data as $group) {
-            $groupObject = new AclGroup();
-            $groupObject->name = $group->group;
-            $groupObject->consumersIds[] = $group->consumer->id;
-            if (isset($groups[$groupObject->name])) {
-              $groups[$groupObject->name]->consumersIds[] = $group->consumer->id;
-              $groups[$groupObject->name]->consumers[] = $consumers[$group->consumer->id];
-            } else {
-              $groups[$groupObject->name] = $groupObject;
-              $groups[$groupObject->name]->consumers[] = $consumers[$group->consumer->id];
-            }
-
-            // fetch acl plugin instances
-            $pluginInstances = array();
-            $pluginInstancesResponse = kong_admin_api_call("/plugins?name=acl", $selected_workspace);
-            foreach ($pluginInstancesResponse["json"]->data as $instance) {
-              $instanceObject = new AclPluginInstance();
-              $instanceObject->id = $instance->id;
-              $instanceObject->allow = $instance->config->allow;
-              $instanceObject->deny = $instance->config->deny;
-              $instanceObject->service = $instance->service;
-              $instanceObject->route = $instance->route;
-              $pluginInstances[$instanceObject->id] = $instanceObject;
-            }
-
-            
-            // fetch services
-            $services = array();
-            $servicesResponse = kong_admin_api_call("/services", $selected_workspace);
-            $services = array_column($servicesResponse["json"]->data, 'name', 'id');
-
-            // fetch routes
-            $routes = array();
-            $routesResponse = kong_admin_api_call("/routes", $selected_workspace);
-            $routes = array_column($routesResponse["json"]->data, 'name', 'id');
-
-          }
+          $consumers = fetch_all_consumers($selected_workspace);
+          $groups = fetch_acl_groups($selected_workspace, $consumers);
+          $pluginInstances = fetch_all_acl_plugin_instances($selected_workspace);         
+          $services = fetch_all_services_names($selected_workspace);
+          $routes = fetch_all_routes_names($selected_workspace);
 
 
           foreach ($groups as $group) {
