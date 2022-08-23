@@ -55,8 +55,12 @@
                 <?php
                   $workspaces = kong_admin_api_call("/workspaces");
                   if(isset($_GET["workspace"])) {
+                    // when this select has been sent
                     $selected_workspace = $_GET["workspace"];
-                  } else {
+                  } else if(isset($_POST["workspace"])) {
+                    // when we get the workspace from the send_mail functionality
+                    $selected_workspace = $_POST["workspace"];
+                  } else { 
                     $selected_workspace = "default";
                   }
                   foreach ($workspaces["json"]->data as $workspace) {
@@ -99,13 +103,13 @@
 
           foreach ($groups as $group) {
             echo "<div class=\"input-group\">";
-            echo "<h2><input type=\"radio\" id=\"$group->name\" name=\"selected_group\" value=\"$group->name\" />&nbsp;".$group->name."</h2>";
+            echo "<h2 ><input type=\"radio\" id=\"$group->name\" name=\"selected_group\" value=\"$group->name\" />&nbsp;".$group->name."</h2>";
             echo "</div>";
 
             // Consumers
-            echo "<div class=\"row align-items-start\">";
+            echo "<div class=\"row align-items-start\"  style=\"border-bottom:1px solid #777\">";
               echo "<div class=\"col\">";
-                echo "<table class=\"table table-striped table-light\"><thead><tr><th>Consumers</th><tbody>";
+                echo "<table class=\"table table-striped table-light table-bordered\"><thead><tr><th>Consumers</th><tbody>";
                   foreach ($group->consumers as $consumer) {
                     echo "<tr><td><a href=\"" . $manager_url . "/" . $selected_workspace . "/consumers/" .$consumer->username . "/#credentials\" target=\”_blank\”>" . $consumer->username;
                     if(isset($consumer->custom_id)) {
@@ -117,7 +121,7 @@
 
               // Allow
               echo "</div><div class=\"col\">";
-              echo "<table class=\"table table-striped table-success\"><thead><tr><th>Allow</th><tbody>";
+              echo "<table class=\"table table-striped table-success table-bordered\"><thead><tr><th>Allow</th><tbody>";
               foreach ($pluginInstances as $instance) {
                 if(isset($instance->allow)) {
                   if(in_array($group->name,$instance->allow)) {
@@ -135,7 +139,7 @@
     
               // Deny
               echo "</div><div class=\"col\">";
-              echo "<table class=\"table table-striped table-danger\"><thead><tr><th>Deny</th><tbody>";
+              echo "<table class=\"table table-striped table-danger table-bordered\"><thead><tr><th>Deny</th><tbody>";
               foreach ($pluginInstances as $instance) {
                 if(isset($instance->deny)) {
                   if(in_array($group->name,$instance->deny)) {
