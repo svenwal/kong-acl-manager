@@ -4,9 +4,9 @@
 
     class Consumer 
     {
-    public $id;
-    public $username;
-    public $custom_id;
+        public $id;
+        public $username;
+        public $custom_id;
     }
 
     function fetch_all_consumers($workspace) {

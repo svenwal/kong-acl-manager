@@ -111,7 +111,7 @@
               echo "<div class=\"col\">";
                 echo "<table class=\"table table-striped table-light table-bordered\"><thead><tr><th>Consumers</th><tbody>";
                   foreach ($group->consumers as $consumer) {
-                    echo "<tr><td><a href=\"" . $manager_url . "/" . $selected_workspace . "/consumers/" .$consumer->username . "/#credentials\" target=\”_blank\”>" . $consumer->username;
+                    echo "<tr><td><a href=\"" . $config->manager_url . "/" . $selected_workspace . "/consumers/" .$consumer->username . "/#credentials\" target=\”_blank\”>" . $consumer->username;
                     if(isset($consumer->custom_id)) {
                       echo " (" . $consumer->custom_id . ")";
                     }
@@ -126,11 +126,11 @@
                 if(isset($instance->allow)) {
                   if(in_array($group->name,$instance->allow)) {
                     if(isset($instance->service)) {
-                      echo "<tr><td><span class=\"badge bg-secondary\">Service</span> <a href=\"" . $manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $services[$instance->service->id] ."</a></td><tr>";
+                      echo "<tr><td><span class=\"badge bg-secondary\">Service</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $services[$instance->service->id] ."</a></td><tr>";
                     } else if(isset($instance->route)) {
-                      echo "<tr><td><span class=\"badge bg-primary\">Route</span> <a href=\"" . $manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $routes[$instance->route->id] ."</a></td><tr>";
+                      echo "<tr><td><span class=\"badge bg-primary\">Route</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $routes[$instance->route->id] ."</a></td><tr>";
                     } else {
-                      echo "<tr><td><span class=\"badge bg-dark\">Global</span> <a href=\"" . $manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $selected_workspace ."</a></td><tr>";
+                      echo "<tr><td><span class=\"badge bg-dark\">Global</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $selected_workspace ."</a></td><tr>";
                     }
                   }
                 }
@@ -144,11 +144,11 @@
                 if(isset($instance->deny)) {
                   if(in_array($group->name,$instance->deny)) {
                     if(isset($instance->service)) {
-                      echo "<tr><td><span class=\"badge bg-secondary\">Service</span> <a href=\"" . $manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $services[$instance->service->id] ."</a></td><tr>";
+                      echo "<tr><td><span class=\"badge bg-secondary\">Service</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $services[$instance->service->id] ."</a></td><tr>";
                     } else if(isset($instance->route)) {
-                      echo "<tr><td><span class=\"badge bg-primary\">Route</span> <a href=\"" . $manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $routes[$instance->route->id] ."</a></td><tr>";
+                      echo "<tr><td><span class=\"badge bg-primary\">Route</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $routes[$instance->route->id] ."</a></td><tr>";
                     } else {
-                      echo "<tr><td><span class=\"badge bg-dark\">Global</span> <a href=\"" . $manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $selected_workspace ."</a></td><tr>";
+                      echo "<tr><td><span class=\"badge bg-dark\">Global</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $selected_workspace ."</a></td><tr>";
                     }
                   }
                 }
@@ -158,10 +158,60 @@
           }
 
           echo "<hr />";
+
+          if(isset($_POST["submit_email"])) {
+            if(!isset($_POST["selected_group"])) {
+              echo "<div class=\"alert alert-danger\" role=\"alert\">Please select a group</div>";
+            } else if(empty($_POST["subject"]) || empty($_POST["title"]) || empty($_POST["text"])) {
+              echo "<div class=\"alert alert-danger\" role=\"alert\">Please fill all fields</div>";
+            }
+            else
+            {
+              echo "<h1>Sending emails to group " . $_POST["selected_group"] . "</h1>";
+              $emailRecipients;
+              foreach ($groups[$_POST["selected_group"]]->consumers as $consumer) {
+                if (filter_var($consumer->username, FILTER_VALIDATE_EMAIL)) {
+                  $emailRecipients[] = $consumer->username;
+                  continue;
+                } else if (filter_var($consumer->custom_id, FILTER_VALIDATE_EMAIL)) {
+                  $emailRecipients[] = $consumer->custom_id;
+                  continue;
+                }
+                echo "<div class=\"alert alert-warning\" role=\"alert\">
+                No valid email address found for consumer ".$consumer->username."
+                </div>";
+              }
+              echo "</ul>";
+              if(empty($emailRecipients)) {
+                echo "<div class=\"alert alert-danger\" role=\"alert\">
+                No valid email address found for any consumer in group ".$_POST["selected_group"]."
+                </div>";
+              } else {
+                echo "<div class=\"alert alert-success\" role=\"alert\">
+                Sending email to ".count($emailRecipients)." recipient(s)
+                </div>";
+                foreach ($emailRecipients as $emailRecipient) {
+                  require("send_email.php");
+                  $emailResponse = send_email($emailRecipient, $emailRecipient, $_POST["subject"] , "<h1>". $_POST["text"] . "</h1><p>" .$_POST["text"] ."</p>", $config->email_smtp_username, $config->email_smtp_password);
+                  
+                  if(!empty($emailResponse)) {
+                    echo "<div class=\"alert alert-danger\" role=\"alert\">
+                    Error sending email to ".$emailRecipient.": ". $emailResponse ."
+                    </div>";
+                  } else {
+                    echo "<div class=\"alert alert-success\" role=\"alert\">
+                    Email sent to ".$emailRecipient."
+                    </div>";
+                  }
+                }
+              }
+            }
+          }
         ?>
 
-<h4>Send email</h4>
-      <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
+
+        <h4>Send email</h4>
+
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="subject">Subject</label>
@@ -177,13 +227,13 @@
         <div class="form-row">
           <div class="form-group col-md-12">
             <label for="text">Text</label>
-	          <textarea name="text" value="<?php echo @$_POST['text'] ?>" class="form-control" id="text" aria-describedby="textHelp" placeholder="The text itself"></textarea>
+	          <textarea name="text" class="form-control" id="text" aria-describedby="textHelp" placeholder="The text itself"><?php echo @$_POST['text'] ?></textarea>
             <small id="textHelp" class="form-text text-muted">The whole text yu want to write. You an add HTML in here</small>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group col-md-12">
-            <button disabled type="submit" class="btn btn-primary">Send email (will be added later)</button>
+            <button type="submit" class="btn btn-primary" name="submit_email">Send email</button>
           </div>
         </div>
         </div>
