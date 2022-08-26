@@ -196,7 +196,7 @@
                 </div>";
                 foreach ($emailRecipients as $emailRecipient) {
                   require("send_email.php");
-                  $emailResponse = send_email($emailRecipient, $emailRecipient, $_POST["subject"] , "<h1>". $_POST["text"] . "</h1><p>" .$_POST["text"] ."</p>", $config->email_smtp_username, $config->email_smtp_password);
+                  $emailResponse = send_email($emailRecipient, $emailRecipient, $_POST["subject"] , "<h1>". $_POST["title"] . "</h1><p>" .$_POST["text"] ."</p>", $config->email_smtp_username, $config->email_smtp_password);
                   
                   if(!empty($emailResponse)) {
                     echo "<div class=\"alert alert-danger\" role=\"alert\">
