@@ -126,7 +126,11 @@
                 if(isset($instance->allow)) {
                   if(in_array($group->name,$instance->allow)) {
                     if(isset($instance->route)) {
-                      echo "<tr><td><span class=\"badge bg-primary\">Route</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $routes[$instance->route->id] ."</a></td><tr>";
+                      echo "<tr><td><span class=\"badge bg-primary\">Route</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $routes[$instance->route->id] ."</a>";
+                      if(isset($instance->service)) {
+                        echo " and<br /><span class=\"badge bg-secondary\">Service</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $services[$instance->service->id] ."</a>";
+                      }
+                      echo "</td><tr>";
                     } else if(isset($instance->service)) {
                       echo "<tr><td><span class=\"badge bg-secondary\">Service</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $services[$instance->service->id] ."</a></td><tr>";
                     } else {
