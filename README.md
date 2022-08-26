@@ -1,7 +1,7 @@
 # Kong Notifier for developers
 
 ## About 
-This web user interface has been built to provide some more visualization into the world of ACL groups. I serves the following use cases
+This web user interface has been built to provide some more visualization into the world of Kong ACL groups. It serves the following use cases:
 
 1. Getting an overview on which ACL groups have been configured to all the consumers
 2. Which consumers are attached to which ACL group
