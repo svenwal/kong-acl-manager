@@ -5,7 +5,7 @@ function kong_admin_api_call($path, $workspace = "default", $method = "get", $ad
     $headers = array(
         "Content-Type: application/json",
         "Accept: application/json",
-        "Authorization: Kong-Admin-Token " . $config->admin_api_token
+        "Kong-Admin-Token: " . $config->admin_api_token
     );
     $headers = array_merge($headers, $addtitonal_headers);
     $ch = curl_init();
