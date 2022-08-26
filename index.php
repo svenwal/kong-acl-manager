@@ -125,10 +125,10 @@
               foreach ($pluginInstances as $instance) {
                 if(isset($instance->allow)) {
                   if(in_array($group->name,$instance->allow)) {
-                    if(isset($instance->service)) {
-                      echo "<tr><td><span class=\"badge bg-secondary\">Service</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $services[$instance->service->id] ."</a></td><tr>";
-                    } else if(isset($instance->route)) {
+                    if(isset($instance->route)) {
                       echo "<tr><td><span class=\"badge bg-primary\">Route</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $routes[$instance->route->id] ."</a></td><tr>";
+                    } else if(isset($instance->service)) {
+                      echo "<tr><td><span class=\"badge bg-secondary\">Service</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $services[$instance->service->id] ."</a></td><tr>";
                     } else {
                       echo "<tr><td><span class=\"badge bg-dark\">Global</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $selected_workspace ."</a></td><tr>";
                     }
@@ -143,10 +143,10 @@
               foreach ($pluginInstances as $instance) {
                 if(isset($instance->deny)) {
                   if(in_array($group->name,$instance->deny)) {
-                    if(isset($instance->service)) {
-                      echo "<tr><td><span class=\"badge bg-secondary\">Service</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $services[$instance->service->id] ."</a></td><tr>";
-                    } else if(isset($instance->route)) {
+                    if(isset($instance->route)) {
                       echo "<tr><td><span class=\"badge bg-primary\">Route</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $routes[$instance->route->id] ."</a></td><tr>";
+                    } else if(isset($instance->service)) {
+                      echo "<tr><td><span class=\"badge bg-secondary\">Service</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $services[$instance->service->id] ."</a></td><tr>";
                     } else {
                       echo "<tr><td><span class=\"badge bg-dark\">Global</span> <a href=\"" . $config->manager_url . "/" . $selected_workspace . "/plugins/acl/" . $instance->id . "\" target=\"_blank\">". $selected_workspace ."</a></td><tr>";
                     }
