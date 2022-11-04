@@ -10,9 +10,16 @@ This web user interface has been built to provide some more visualization into t
 
 ## Installation
 
+### Locally / VM
 - Have a webserver with a recent PHP (tested PHP 7 and PHP 8)
 - Put all files from the repo into a folder of this webserver
 - copy the file `secrets-template.php` to `secrets.php` and change the settings in there (Kong connection and SMTP email server details) according to your setup
+
+### Docker
+
+This image has been uploaded to Docker Hub: <https://hub.docker.com/repository/docker/svenwal/kong-acl-manager>
+
+See the `docker-compose.yaml` file for an example on how to run this image.
 
 ## Usage
 
