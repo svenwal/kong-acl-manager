@@ -1,6 +1,6 @@
 <?php
 function kong_admin_api_call($path, $workspace = "default", $method = "get", $addtitonal_headers = array(), $body = "") {
-    require("secrets.php");
+    global $config;
     $url = $config->admin_api_url . "/" . $workspace . $path;
     $headers = array(
         "Content-Type: application/json",

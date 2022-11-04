@@ -1,6 +1,6 @@
 <?php
     /* This file fetches all Routes */
-    require_once("secrets.php");
+    require_once("load_config.php");
     require_once("kong/kong_admin_api.php");
 
     function fetch_all_routes_names($workspace, $all_Routes = null) {

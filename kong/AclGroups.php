@@ -1,6 +1,6 @@
 <?php
     /* This file hosts all classes and functions about Kong ACL Groups */
-    require_once("secrets.php");
+    require_once("load_config.php");
     require_once("kong/kong_admin_api.php");
 
     class AclGroup

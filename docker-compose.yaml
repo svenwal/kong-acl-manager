@@ -1,0 +1,18 @@
+version: "3"
+services:
+ kong-acl-manager:
+  image: svenwal/kong-acl-manager:latest
+  container_name: kong-acl-manager
+  hostname: kong-acl-manager
+  restart: on-failure
+  ports:
+   - 29080:80
+  environment:
+    CONFIG_ADMIN_API_URL: http://localhost:8001
+    CONFIG_MANAGER_URL: http://localhost:8002
+    CONFIG_EMAIL_SMTP_HOST: smtp.google.com
+    CONFIG_EMAIL_SMTP_PORT: 587
+    CONFIG_EMAIL_SMTP_USERNAME: foo
+    CONFIG_EMAIL_SMTP_PASSWORD: foo
+    CONFIG_EMAIL_FROM_ADDRESS: foo
+    CONFIG_ADMIN_API_TOKEN: foo
