@@ -1,6 +1,6 @@
 <?php
     /* This file hosts all instances of the ACL plugin */
-    require_once("secrets.php");
+    require_once("load_config.php");
     require_once("kong/kong_admin_api.php");
 
     class AclPluginInstance

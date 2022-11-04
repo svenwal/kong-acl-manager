@@ -1,6 +1,6 @@
 <?php
     /* This file fetches all services */
-    require_once("secrets.php");
+    require_once("load_config.php");
     require_once("kong/kong_admin_api.php");
 
     function fetch_all_services_names($workspace, $all_services = null) {

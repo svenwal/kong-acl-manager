@@ -1,7 +1,7 @@
 <!doctype html>
 <?php
   require_once("kong/kong_admin_api.php");
-  require_once("secrets.php");
+  require_once("load_config.php");
   require("kong/AclGroups.php");
   require("kong/Consumers.php");
   require("kong/AclPluginInstances.php");
