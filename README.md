@@ -1,4 +1,4 @@
-# Kong Notifier for developers
+# Kong ACL Manager
 
 ## About 
 This web user interface has been built to provide some more visualization into the world of Kong ACL groups. It serves the following use cases:
